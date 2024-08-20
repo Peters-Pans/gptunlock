@@ -1,3 +1,5 @@
+#!/bin/bash
+
 check_chatgpt_access() {
     # 检测 ChatGPT 网页访问
     web_result=$(curl -s -o /dev/null -w "%{http_code}" https://chat.openai.com/)
