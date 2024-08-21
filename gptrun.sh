@@ -1,87 +1,134 @@
-red='\033[0;31m'
-bblue='\033[0;34m'
-yellow='\033[0;33m'
-green='\033[0;32m'
-plain='\033[0m'
-red(){ echo -e "\033[31m\033[01m$1\033[0m";}
-green(){ echo -e "\033[32m\033[01m$1\033[0m";}
-yellow(){ echo -e "\033[33m\033[01m$1\033[0m";}
-blue(){ echo -e "\033[36m\033[01m$1\033[0m";}
-white(){ echo -e "\033[37m\033[01m$1\033[0m";}
-bblue(){ echo -e "\033[34m\033[01m$1\033[0m";}
-rred(){ echo -e "\033[35m\033[01m$1\033[0m";}
+#!/bin/bash
 
-chatgpt4(){
-	gpt1=$(curl -s4 https://chat.openai.com 2>&1)
-	gpt2=$(curl -s4 https://android.chat.openai.com 2>&1)
-}
-chatgpt6(){
-	gpt1=$(curl -s6 https://chat.openai.com 2>&1)
-	gpt2=$(curl -s6 https://android.chat.openai.com 2>&1)
-}
-checkgpt(){
-	if [[ $gpt1 == *location* ]]; then
-		if [[ $gpt2 == *VPN* ]]; then
-			chat='遗憾，当前IP仅解锁ChatGPT网页，未解锁客户端'
-		elif [[ $gpt2 == *Request* ]]; then
-			chat='恭喜，当前IP完整解锁ChatGPT (网页+客户端)'
-		else
-			chat='杯具，当前IP无法解锁ChatGPT服务'
-		fi
-	else
-		chat='杯具，当前IP无法解锁ChatGPT服务'
-	fi
+# 假设这些变量已定义
+Font_Cyan="\e[36m"
+Font_B="\e[1m"
+Font_I="\e[3m"
+Font_Suffix="\e[0m"
+ibar_step=0
+
+# 定义一个显示进度条的占位符函数
+show_progress_bar() {
+    echo "Showing progress bar: $1"
 }
 
-nf4(){
-	UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36"
-	result=$(curl -4fsL --user-agent "${UA_Browser}" --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/70143836" 2>&1)
-	if [[ "$result" == "404" ]]; then 
-		NF="遗憾，当前IP仅解锁Netflix自制剧"
-	elif [[ "$result" == "403" ]]; then
-		NF="杯具，当前IP不能看Netflix"
-	elif [[ "$result" == "200" ]]; then
-		NF="恭喜，当前IP完整解锁Netflix非自制剧"
-	else
-		NF="死心吧，Netflix不服务当前IP地区"
-	fi
+# 定义一个杀死进度条的占位符函数
+kill_progress_bar() {
+    echo "Killing progress bar..."
 }
 
-nf6(){
-	UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36"
-	result=$(curl -6fsL --user-agent "${UA_Browser}" --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/70143836" 2>&1)
-	if [[ "$result" == "404" ]]; then 
-		NF="遗憾，当前IP仅解锁Netflix自制剧"
-	elif [[ "$result" == "403" ]]; then
-		NF="杯具，当前IP不能看Netflix"
-	elif [[ "$result" == "200" ]]; then
-		NF="恭喜，当前IP完整解锁Netflix非自制剧"
-	else
-		NF="死心吧，Netflix不服务当前IP地区"
-	fi
+# 假设这些是 DNS 检查函数的占位符
+Check_DNS_1() {
+    echo "DNS check 1 for $1"
 }
 
-v4v6(){
-	v4=$(curl -s4m5 icanhazip.com -k)
-	v6=$(curl -s6m5 icanhazip.com -k)
+Check_DNS_2() {
+    echo "DNS check 2 for $1"
 }
 
-v4v6
-UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36"
-if [[ -n $v6 ]]; then
-	nonf=$(curl -s6 --user-agent "${UA_Browser}" http://ip-api.com/json/$v6?lang=zh-CN -k | cut -f2 -d"," | cut -f4 -d '"')
-	nf6;chatgpt6;checkgpt
-	v6Status=$(white "IPV6地址：\c" ; blue "$v6   $nonf" ; white " Netflix： \c" ; blue "$NF" ; white " ChatGPT： \c" ; blue "$chat")
-else
-	v6Status=$(white "IPV6地址：\c" ; red "不存在IPV6地址")
-fi
-if [[ -n $v4 ]]; then
-	nonf=$(curl -s4 --user-agent "${UA_Browser}" http://ip-api.com/json/$v4?lang=zh-CN -k | cut -f2 -d"," | cut -f4 -d '"')
-	nf4;chatgpt4;checkgpt
-	v4Status=$(white "IPV4地址：\c" ; blue "$v4   $nonf" ; white " Netflix： \c" ; blue "$NF" ; white " ChatGPT： \c" ; blue "$chat")
-else
-	v4Status=$(white "IPV4地址：\c" ; red "不存在IPV4地址")
-fi
+Check_DNS_3() {
+    echo "DNS check 3 for $1"
+}
 
-echo -e "$v4Status"
-echo -e "$v6Status"
+# 假设一个解锁类型检测的占位符函数
+Get_Unlock_Type() {
+    echo "Unlock type detected"
+}
+
+# 假设smedia数组
+smedia=([yes]="Yes" [no]="No" [web]="Web" [app]="App" [bad]="Bad" [nodata]="No Data")
+
+OpenAITest() {
+    local temp_info="$Font_Cyan$Font_B${sinfo[ai]}${Font_I}ChatGPT $Font_Suffix"
+    ((ibar_step+=3))
+    show_progress_bar "$temp_info" $((40-8-${sinfo[lai]}))&
+    bar_pid="$!"&&disown "$bar_pid"
+    trap "kill_progress_bar" RETURN
+
+    chatgpt=()
+    local checkunlockurl="chat.openai.com"
+    local result1=$(Check_DNS_1 $checkunlockurl)
+    local result2=$(Check_DNS_2 $checkunlockurl)
+    local result3=$(Check_DNS_3 $checkunlockurl)
+
+    checkunlockurl="ios.chat.openai.com"
+    local result4=$(Check_DNS_1 $checkunlockurl)
+    local result5=$(Check_DNS_2 $checkunlockurl)
+    local result6=$(Check_DNS_3 $checkunlockurl)
+
+    checkunlockurl="api.openai.com"
+    local result7=$(Check_DNS_1 $checkunlockurl)
+    local result8=$(Check_DNS_3 $checkunlockurl)
+
+    local resultunlocktype=$(Get_Unlock_Type $result1 $result2 $result3 $result4 $result5 $result6 $result7 $result8)
+
+    # Make curl requests and capture output
+    local tmpresult1=$(curl -sS --max-time 10 'https://api.openai.com/compliance/cookie_requirements' \
+        -H 'authority: api.openai.com' \
+        -H 'accept: */*' \
+        -H 'accept-language: zh-CN,zh;q=0.9' \
+        -H 'authorization: Bearer null' \
+        -H 'content-type: application/json' \
+        -H 'origin: https://platform.openai.com' \
+        -H 'referer: https://platform.openai.com/' \
+        -H 'sec-ch-ua: "Microsoft Edge";v="119", "Chromium";v="119", "Not?A_Brand";v="24"' \
+        -H 'sec-ch-ua-mobile: ?0' \
+        -H 'sec-ch-ua-platform: "Windows"' \
+        -H 'sec-fetch-dest: empty' \
+        -H 'sec-fetch-mode: cors' \
+        -H 'sec-fetch-site: same-site' \
+        -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0' 2>&1)
+
+    local tmpresult2=$(curl -sS --max-time 10 'https://ios.chat.openai.com/' \
+        -H 'authority: ios.chat.openai.com' \
+        -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+        -H 'accept-language: zh-CN,zh;q=0.9' \
+        -H 'sec-ch-ua: "Microsoft Edge";v="119", "Chromium";v="119", "Not?A_Brand";v="24"' \
+        -H 'sec-ch-ua-mobile: ?0' \
+        -H 'sec-ch-ua-platform: "Windows"' \
+        -H 'sec-fetch-dest: document' \
+        -H 'sec-fetch-mode: navigate' \
+        -H 'sec-fetch-site: none' \
+        -H 'sec-fetch-user: ?1' \
+        -H 'upgrade-insecure-requests: 1' \
+        -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0' 2>&1)
+
+    result1=$(echo $tmpresult1 | grep -o "unsupported_country")
+    result2=$(echo $tmpresult2 | grep -o "VPN")
+
+    local countryCode=$(curl --max-time 10 -sS https://chat.openai.com/cdn-cgi/trace 2>&1 | grep "loc=" | awk -F= '{print $2}')
+
+    if [ -z "$result2" ] && [ -z "$result1" ] && [[ $tmpresult1 != "curl"* ]] && [[ $tmpresult2 != "curl"* ]]; then
+        chatgpt[ustatus]="${smedia[yes]}"
+        chatgpt[uregion]="[$countryCode]"
+        chatgpt[utype]="$resultunlocktype"
+    elif [ -n "$result2" ] && [ -n "$result1" ]; then
+        chatgpt[ustatus]="${smedia[no]}"
+        chatgpt[uregion]="${smedia[nodata]}"
+        chatgpt[utype]="${smedia[nodata]}"
+    elif [ -z "$result1" ] && [ -n "$result2" ] && [[ $tmpresult1 != "curl"* ]]; then
+        chatgpt[ustatus]="${smedia[web]}"
+        chatgpt[uregion]="[$countryCode]"
+        chatgpt[utype]="$resultunlocktype"
+    elif [ -n "$result1" ] && [ -z "$result2" ]; then
+        chatgpt[ustatus]="${smedia[app]}"
+        chatgpt[uregion]="[$countryCode]"
+        chatgpt[utype]="$resultunlocktype"
+    elif [[ $tmpresult1 == "curl"* ]] && [ -n "$result2" ]; then
+        chatgpt[ustatus]="${smedia[no]}"
+        chatgpt[uregion]="${smedia[nodata]}"
+        chatgpt[utype]="${smedia[nodata]}"
+    else
+        chatgpt[ustatus]="${smedia[bad]}"
+        chatgpt[uregion]="${smedia[nodata]}"
+        chatgpt[utype]="${smedia[nodata]}"
+    fi
+}
+
+# 调用 OpenAITest 函数以测试其功能
+OpenAITest
+
+# 输出结果
+echo "Status: ${chatgpt[ustatus]}"
+echo "Region: ${chatgpt[uregion]}"
+echo "Type: ${chatgpt[utype]}"
