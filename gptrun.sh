@@ -7,6 +7,9 @@ Font_I="\e[3m"
 Font_Suffix="\e[0m"
 ibar_step=0
 
+# 假设sinfo数组已经定义，且sinfo[lai]有值
+sinfo=([ai]="AI_Test" [lai]=8)
+
 # 定义一个显示进度条的占位符函数
 show_progress_bar() {
     echo "Showing progress bar: $1"
@@ -41,8 +44,10 @@ smedia=([yes]="Yes" [no]="No" [web]="Web" [app]="App" [bad]="Bad" [nodata]="No D
 OpenAITest() {
     local temp_info="$Font_Cyan$Font_B${sinfo[ai]}${Font_I}ChatGPT $Font_Suffix"
     ((ibar_step+=3))
-    show_progress_bar "$temp_info" $((40-8-${sinfo[lai]}))&
-    bar_pid="$!"&&disown "$bar_pid"
+    
+    # 使用固定数值来测试进度条显示的计算
+    show_progress_bar "$temp_info" $((40 - 8 - ${sinfo[lai]})) &
+    bar_pid="$!" && disown "$bar_pid"
     trap "kill_progress_bar" RETURN
 
     chatgpt=()
